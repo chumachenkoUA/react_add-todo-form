@@ -7,12 +7,12 @@ import todosFromServer from './api/todos';
 import { getUserById } from './utils/getUserById';
 
 export const App = () => {
-  const todosWithUsers = todosFromServer.map(todo => ({
-    ...todo,
-    user: getUserById(todo.userId),
-  }));
-
-  const [todos, setTodos] = useState(todosWithUsers);
+  const [todos, setTodos] = useState(() =>
+    todosFromServer.map(todo => ({
+      ...todo,
+      user: getUserById(todo.userId),
+    })),
+  );
 
   const [title, setTitle] = useState('');
   const [hasTitleError, setHasTitleError] = useState(false);
@@ -42,7 +42,7 @@ export const App = () => {
 
     const newTodo = {
       userId,
-      id: Math.max(...todos.map(todo => todo.id)) + 1,
+      id: todos.length > 0 ? Math.max(...todos.map(todo => todo.id)) + 1 : 1,
       title,
       completed: false,
       user: getUserById(userId),

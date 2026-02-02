@@ -20,18 +20,18 @@ export const App = () => {
   const [userId, setUserId] = useState(0);
   const [hasUserError, setHasUserError] = useState(false);
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
+  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(event.target.value);
     setHasTitleError(false);
   };
 
-  const handleUserIdChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setUserId(+e.target.value);
+  const handleUserIdChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setUserId(+event.target.value);
     setHasUserError(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
 
     setHasTitleError(!title);
     setHasUserError(!userId);

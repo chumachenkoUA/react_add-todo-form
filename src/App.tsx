@@ -1,27 +1,91 @@
 import './App.scss';
+import { TodoList } from './components/TodoList';
+import React, { useState } from 'react';
 
-// import usersFromServer from './api/users';
-// import todosFromServer from './api/todos';
+import usersFromServer from './api/users';
+import todosFromServer from './api/todos';
+import { getUserById } from './utils/getUserById';
 
 export const App = () => {
+  const todosWithUsers = todosFromServer.map(todo => ({
+    ...todo,
+    user: getUserById(todo.userId),
+  }));
+
+  const [todos, setTodos] = useState(todosWithUsers);
+
+  const [title, setTitle] = useState('');
+  const [hasTitleError, setHasTitleError] = useState(false);
+
+  const [userId, setUserId] = useState(0);
+  const [hasUserError, setHasUserError] = useState(false);
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+    setHasTitleError(false);
+  };
+
+  const handleUserIdChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setUserId(+e.target.value);
+    setHasUserError(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setHasTitleError(!title);
+    setHasUserError(!userId);
+
+    if (!title || !userId) {
+      return;
+    }
+
+    const newTodo = {
+      userId,
+      id: Math.max(...todos.map(todo => todo.id)) + 1,
+      title,
+      completed: false,
+      user: getUserById(userId),
+    };
+
+    setTodos([...todos, newTodo]);
+    setTitle('');
+    setUserId(0);
+  };
+
   return (
     <div className="App">
       <h1>Add todo form</h1>
 
-      <form action="/api/todos" method="POST">
+      <form action="/api/todos" method="POST" onSubmit={handleSubmit}>
         <div className="field">
-          <input type="text" data-cy="titleInput" />
-          <span className="error">Please enter a title</span>
+          <input
+            type="text"
+            data-cy="titleInput"
+            placeholder="Enter title"
+            value={title}
+            onChange={handleTitleChange}
+          />
+          {hasTitleError && <span className="error">Please enter a title</span>}
         </div>
 
         <div className="field">
-          <select data-cy="userSelect">
+          <select
+            data-cy="userSelect"
+            value={userId}
+            onChange={handleUserIdChange}
+          >
             <option value="0" disabled>
               Choose a user
             </option>
+            {usersFromServer.map(user => (
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
+            ))}
           </select>
 
-          <span className="error">Please choose a user</span>
+          {hasUserError && <span className="error">Please choose a user</span>}
         </div>
 
         <button type="submit" data-cy="submitButton">
@@ -29,33 +93,7 @@ export const App = () => {
         </button>
       </form>
 
-      <section className="TodoList">
-        <article data-id="1" className="TodoInfo TodoInfo--completed">
-          <h2 className="TodoInfo__title">delectus aut autem</h2>
-
-          <a className="UserInfo" href="mailto:Sincere@april.biz">
-            Leanne Graham
-          </a>
-        </article>
-
-        <article data-id="15" className="TodoInfo TodoInfo--completed">
-          <h2 className="TodoInfo__title">delectus aut autem</h2>
-
-          <a className="UserInfo" href="mailto:Sincere@april.biz">
-            Leanne Graham
-          </a>
-        </article>
-
-        <article data-id="2" className="TodoInfo">
-          <h2 className="TodoInfo__title">
-            quis ut nam facilis et officia qui
-          </h2>
-
-          <a className="UserInfo" href="mailto:Julianne.OConner@kory.org">
-            Patricia Lebsack
-          </a>
-        </article>
-      </section>
+      <TodoList todos={todos} />
     </div>
   );
 };
